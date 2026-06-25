@@ -1,5 +1,6 @@
 import type { ApiStanding, ApiTeam } from "../lib/api";
 import { orderGroupsFavoritesFirst } from "../lib/favorites";
+import { compareGroupStandings, standingsByGroupAndTeam } from "../lib/standings";
 import { TeamHoverCard } from "./TeamHoverCard";
 
 interface Props {
@@ -67,7 +68,7 @@ function TeamRow({ t, standing, isFavorite, onToggleFavorite }: TeamRowProps) {
 }
 
 export function GroupStrip({ teams, favorites, standings, onToggleFavorite }: Props) {
-  const standingsByTeamId = new Map(standings.map((s) => [s.team_id, s]));
+  const standingsForGroup = standingsByGroupAndTeam(standings);
 
   const byGroup = new Map<string, ApiTeam[]>();
   for (const t of teams) {
@@ -79,9 +80,9 @@ export function GroupStrip({ teams, favorites, standings, onToggleFavorite }: Pr
     group,
     teamIds: list.map((t) => t.id),
     teams: [...list].sort((a, b) => {
-      const sa = standingsByTeamId.get(a.id);
-      const sb = standingsByTeamId.get(b.id);
-      if (sa && sb) return sa.rank - sb.rank;
+      const sa = standingsForGroup.get(`${group}:${a.id}`);
+      const sb = standingsForGroup.get(`${group}:${b.id}`);
+      if (sa && sb) return compareGroupStandings(sa, sb);
       if (sa) return -1;
       if (sb) return 1;
       return a.country.localeCompare(b.country);
@@ -106,7 +107,7 @@ export function GroupStrip({ teams, favorites, standings, onToggleFavorite }: Pr
               <TeamRow
                 key={t.id}
                 t={t}
-                standing={standingsByTeamId.get(t.id)}
+                standing={standingsForGroup.get(`${g.group}:${t.id}`)}
                 isFavorite={favorites.includes(t.id)}
                 onToggleFavorite={onToggleFavorite}
               />

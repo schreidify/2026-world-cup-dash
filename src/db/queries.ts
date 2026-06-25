@@ -76,7 +76,7 @@ export async function getTopStandings(db: D1Database, limit: number): Promise<St
 
 export async function getStandingsByGroup(db: D1Database): Promise<Standing[]> {
   const { results } = await db
-    .prepare(`SELECT * FROM standings ORDER BY "group" ASC, rank ASC`)
+    .prepare(`SELECT * FROM standings WHERE length("group") = 1 ORDER BY "group" ASC, points DESC, gd DESC`)
     .all<Standing>();
   return results;
 }
@@ -168,7 +168,14 @@ export async function getLastSync(db: D1Database): Promise<{ ran_at: string } | 
 }
 
 export async function getStandingForTeam(db: D1Database, teamId: number): Promise<Standing | null> {
-  return db.prepare(`SELECT * FROM standings WHERE team_id = ? LIMIT 1`).bind(teamId).first<Standing>();
+  return db
+    .prepare(
+      `SELECT s.* FROM standings s
+       JOIN teams t ON t.id = s.team_id AND s."group" = t."group"
+       WHERE s.team_id = ? LIMIT 1`,
+    )
+    .bind(teamId)
+    .first<Standing>();
 }
 
 export async function getNextGameForTeam(db: D1Database, teamId: number, nowIso: string): Promise<Fixture | null> {

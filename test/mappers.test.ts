@@ -129,6 +129,43 @@ describe("mapStandings", () => {
       rank: 1,
     });
   });
+
+  it("ignores overall Group Stage standings that duplicate per-group rows", () => {
+    const vendor = {
+      response: [
+        {
+          league: {
+            standings: [
+              [
+                {
+                  rank: 1,
+                  team: { id: 6 },
+                  group: "Group C",
+                  all: { played: 3, win: 2, draw: 1, lose: 0, goals: { for: 7, against: 1 } },
+                  goalsDiff: 6,
+                  points: 7,
+                },
+              ],
+              [
+                {
+                  rank: 2,
+                  team: { id: 6 },
+                  group: "Group Stage",
+                  all: { played: 1, win: 0, draw: 1, lose: 0, goals: { for: 1, against: 1 } },
+                  goalsDiff: 0,
+                  points: 1,
+                },
+              ],
+            ],
+          },
+        },
+      ],
+    };
+    const rows = mapStandings(vendor as any);
+    expect(rows).toEqual([
+      expect.objectContaining({ group: "C", team_id: 6, points: 7, win: 2, draw: 1, gd: 6 }),
+    ]);
+  });
 });
 
 describe("mapMatchStats", () => {

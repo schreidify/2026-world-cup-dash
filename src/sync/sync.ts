@@ -38,6 +38,7 @@ export async function runHourlySync(env: Env, deps: Partial<SyncDeps> = {}): Pro
 
     const standingsRaw = await d.fetchStandings(env.APIFOOTBALL_KEY);
     requests++;
+    await env.DB.prepare(`DELETE FROM standings`).run();
     await upsertStandings(env.DB, mapStandings(standingsRaw));
 
     const finished = fixtures.filter((f) => f.status === "finished");

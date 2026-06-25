@@ -33,9 +33,9 @@ export function mapFixtures(payload: { response: any[] }): Fixture[] {
   });
 }
 
-function normalizeGroup(g: string): string {
+function normalizeGroup(g: string): string | null {
   const m = g.match(/Group ([A-L])/i);
-  return m ? m[1].toUpperCase() : g;
+  return m ? m[1].toUpperCase() : null;
 }
 
 export function mapStandings(payload: { response: any[] }): Standing[] {
@@ -43,8 +43,10 @@ export function mapStandings(payload: { response: any[] }): Standing[] {
   for (const league of payload.response) {
     for (const groupArr of league.league.standings) {
       for (const row of groupArr) {
+        const group = normalizeGroup(row.group);
+        if (!group) continue;
         out.push({
-          group: normalizeGroup(row.group),
+          group,
           team_id: row.team.id,
           played: row.all.played,
           win: row.all.win,

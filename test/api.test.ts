@@ -145,6 +145,18 @@ describe("GET /api/teams", () => {
 describe("GET /api/teams/:id/detail", () => {
   it("returns the team's standing, next game, and roster", async () => {
     const future = new Date(Date.now() + 86400000).toISOString();
+    await upsertTeams(env.DB, [
+      {
+        id: 10,
+        country: "Brazil",
+        group: "A",
+        flag: "f",
+        fifa_code: "BRA",
+        appearances_since_1930: 22,
+        last_appearance: 2022,
+        wins_since_1930: 5,
+      },
+    ]);
     await upsertStandings(env.DB, [
       {
         group: "A",
