@@ -1,0 +1,27 @@
+{
+  "name": "world-cup-dashboard",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run build:web && wrangler dev",
+    "dev:watch": "npm run build:web && (cd web && vite build --watch &) && wrangler dev",
+    "deploy": "npm run build:web && wrangler deploy",
+    "build:web": "cd web && vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:apply:local": "wrangler d1 execute worldcup --local --file=schema.sql",
+    "db:apply:remote": "wrangler d1 execute worldcup --remote --file=schema.sql",
+    "probe": "node scripts/probe.mjs",
+    "sync:local": "curl -s -X POST http://localhost:8787/api/sync",
+    "teams:build": "node scripts/build-teams-2026.mjs",
+    "teams:seed": "node --experimental-strip-types scripts/seed-teams.mjs",
+    "teams:load:local": "wrangler d1 execute worldcup --local --file=seed-teams.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.5.0",
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0",
+    "wrangler": "^3.80.0"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "world-cup-dashboard",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "triggers": {
+    "crons": ["0 * * * *"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "worldcup",
+      "database_id": "0d7a861d-09f6-4528-bce3-6ca67cd767f5",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "assets": {
+    "directory": "./web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  }
+}

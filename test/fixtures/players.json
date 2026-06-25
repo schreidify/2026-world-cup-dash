@@ -1,0 +1,16 @@
+{
+  "get": "players",
+  "parameters": { "team": "10", "season": "2026" },
+  "errors": [],
+  "results": 2,
+  "response": [
+    {
+      "player": { "name": "Jane Doe", "number": 9 },
+      "statistics": [{ "games": { "position": "Attacker" } }]
+    },
+    {
+      "player": { "name": "Sam Roe", "number": null },
+      "statistics": [{ "games": { "position": "Defender" } }]
+    }
+  ]
+}

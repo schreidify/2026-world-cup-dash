@@ -1,0 +1,343 @@
+[
+  {
+    "id": 770,
+    "country": "Czechia",
+    "history_country": "Czech Republic",
+    "group": "A",
+    "fifa_code": "CZE",
+    "flag": "https://media.api-sports.io/flags/cz.svg"
+  },
+  {
+    "id": 16,
+    "country": "Mexico",
+    "group": "A",
+    "fifa_code": "MEX",
+    "flag": "https://media.api-sports.io/flags/mx.svg"
+  },
+  {
+    "id": 1531,
+    "country": "South Africa",
+    "group": "A",
+    "fifa_code": "RSA",
+    "flag": "https://media.api-sports.io/flags/za.svg"
+  },
+  {
+    "id": 17,
+    "country": "South Korea",
+    "group": "A",
+    "fifa_code": "KOR",
+    "flag": "https://media.api-sports.io/flags/kr.svg"
+  },
+  {
+    "id": 1113,
+    "country": "Bosnia & Herzegovina",
+    "history_country": "Bosnia-Herzegovina",
+    "group": "B",
+    "fifa_code": "BIH",
+    "flag": "https://media.api-sports.io/flags/ba.svg"
+  },
+  {
+    "id": 5529,
+    "country": "Canada",
+    "group": "B",
+    "fifa_code": "CAN",
+    "flag": "https://media.api-sports.io/flags/ca.svg"
+  },
+  {
+    "id": 1569,
+    "country": "Qatar",
+    "group": "B",
+    "fifa_code": "QAT",
+    "flag": "https://media.api-sports.io/flags/qa.svg"
+  },
+  {
+    "id": 15,
+    "country": "Switzerland",
+    "group": "B",
+    "fifa_code": "SUI",
+    "flag": "https://media.api-sports.io/flags/ch.svg"
+  },
+  {
+    "id": 6,
+    "country": "Brazil",
+    "group": "C",
+    "fifa_code": "BRA",
+    "flag": "https://media.api-sports.io/flags/br.svg"
+  },
+  {
+    "id": 2386,
+    "country": "Haiti",
+    "group": "C",
+    "fifa_code": "HAI",
+    "flag": "https://media.api-sports.io/flags/ht.svg"
+  },
+  {
+    "id": 31,
+    "country": "Morocco",
+    "group": "C",
+    "fifa_code": "MAR",
+    "flag": "https://media.api-sports.io/flags/ma.svg"
+  },
+  {
+    "id": 1108,
+    "country": "Scotland",
+    "group": "C",
+    "fifa_code": "SCO",
+    "flag": "https://media.api-sports.io/flags/gb-sct.svg"
+  },
+  {
+    "id": 20,
+    "country": "Australia",
+    "group": "D",
+    "fifa_code": "AUS",
+    "flag": "https://media.api-sports.io/flags/au.svg"
+  },
+  {
+    "id": 2380,
+    "country": "Paraguay",
+    "group": "D",
+    "fifa_code": "PAR",
+    "flag": "https://media.api-sports.io/flags/py.svg"
+  },
+  {
+    "id": 777,
+    "country": "Türkiye",
+    "history_country": "Turkey",
+    "group": "D",
+    "fifa_code": "TUR",
+    "flag": "https://media.api-sports.io/flags/tr.svg"
+  },
+  {
+    "id": 2384,
+    "country": "USA",
+    "group": "D",
+    "fifa_code": "USA",
+    "flag": "https://media.api-sports.io/flags/us.svg"
+  },
+  {
+    "id": 5530,
+    "country": "Curaçao",
+    "group": "E",
+    "fifa_code": "CUR",
+    "flag": "https://media.api-sports.io/flags/cw.svg"
+  },
+  {
+    "id": 2382,
+    "country": "Ecuador",
+    "group": "E",
+    "fifa_code": "ECU",
+    "flag": "https://media.api-sports.io/flags/ec.svg"
+  },
+  {
+    "id": 25,
+    "country": "Germany",
+    "group": "E",
+    "fifa_code": "GER",
+    "flag": "https://media.api-sports.io/flags/de.svg"
+  },
+  {
+    "id": 1501,
+    "country": "Ivory Coast",
+    "history_country": "Côte d'Ivoire",
+    "group": "E",
+    "fifa_code": "CIV",
+    "flag": "https://media.api-sports.io/flags/ci.svg"
+  },
+  {
+    "id": 12,
+    "country": "Japan",
+    "group": "F",
+    "fifa_code": "JPN",
+    "flag": "https://media.api-sports.io/flags/jp.svg"
+  },
+  {
+    "id": 1118,
+    "country": "Netherlands",
+    "group": "F",
+    "fifa_code": "NED",
+    "flag": "https://media.api-sports.io/flags/nl.svg"
+  },
+  {
+    "id": 5,
+    "country": "Sweden",
+    "group": "F",
+    "fifa_code": "SWE",
+    "flag": "https://media.api-sports.io/flags/se.svg"
+  },
+  {
+    "id": 28,
+    "country": "Tunisia",
+    "group": "F",
+    "fifa_code": "TUN",
+    "flag": "https://media.api-sports.io/flags/tn.svg"
+  },
+  {
+    "id": 1,
+    "country": "Belgium",
+    "group": "G",
+    "fifa_code": "BEL",
+    "flag": "https://media.api-sports.io/flags/be.svg"
+  },
+  {
+    "id": 32,
+    "country": "Egypt",
+    "group": "G",
+    "fifa_code": "EGY",
+    "flag": "https://media.api-sports.io/flags/eg.svg"
+  },
+  {
+    "id": 22,
+    "country": "Iran",
+    "group": "G",
+    "fifa_code": "IRN",
+    "flag": "https://media.api-sports.io/flags/ir.svg"
+  },
+  {
+    "id": 4673,
+    "country": "New Zealand",
+    "group": "G",
+    "fifa_code": "NZL",
+    "flag": "https://media.api-sports.io/flags/nz.svg"
+  },
+  {
+    "id": 1533,
+    "country": "Cape Verde Islands",
+    "group": "H",
+    "fifa_code": "CPV",
+    "flag": "https://media.api-sports.io/flags/cv.svg"
+  },
+  {
+    "id": 23,
+    "country": "Saudi Arabia",
+    "group": "H",
+    "fifa_code": "KSA",
+    "flag": "https://media.api-sports.io/flags/sa.svg"
+  },
+  {
+    "id": 9,
+    "country": "Spain",
+    "group": "H",
+    "fifa_code": "ESP",
+    "flag": "https://media.api-sports.io/flags/es.svg"
+  },
+  {
+    "id": 7,
+    "country": "Uruguay",
+    "group": "H",
+    "fifa_code": "URU",
+    "flag": "https://media.api-sports.io/flags/uy.svg"
+  },
+  {
+    "id": 2,
+    "country": "France",
+    "group": "I",
+    "fifa_code": "FRA",
+    "flag": "https://media.api-sports.io/flags/fr.svg"
+  },
+  {
+    "id": 1567,
+    "country": "Iraq",
+    "group": "I",
+    "fifa_code": "IRQ",
+    "flag": "https://media.api-sports.io/flags/iq.svg"
+  },
+  {
+    "id": 1090,
+    "country": "Norway",
+    "group": "I",
+    "fifa_code": "NOR",
+    "flag": "https://media.api-sports.io/flags/no.svg"
+  },
+  {
+    "id": 13,
+    "country": "Senegal",
+    "group": "I",
+    "fifa_code": "SEN",
+    "flag": "https://media.api-sports.io/flags/sn.svg"
+  },
+  {
+    "id": 1532,
+    "country": "Algeria",
+    "group": "J",
+    "fifa_code": "ALG",
+    "flag": "https://media.api-sports.io/flags/dz.svg"
+  },
+  {
+    "id": 26,
+    "country": "Argentina",
+    "group": "J",
+    "fifa_code": "ARG",
+    "flag": "https://media.api-sports.io/flags/ar.svg"
+  },
+  {
+    "id": 775,
+    "country": "Austria",
+    "group": "J",
+    "fifa_code": "AUT",
+    "flag": "https://media.api-sports.io/flags/at.svg"
+  },
+  {
+    "id": 1548,
+    "country": "Jordan",
+    "group": "J",
+    "fifa_code": "JOR",
+    "flag": "https://media.api-sports.io/flags/jo.svg"
+  },
+  {
+    "id": 8,
+    "country": "Colombia",
+    "group": "K",
+    "fifa_code": "COL",
+    "flag": "https://media.api-sports.io/flags/co.svg"
+  },
+  {
+    "id": 1508,
+    "country": "Congo DR",
+    "history_country": "Zaire",
+    "group": "K",
+    "fifa_code": "CGO",
+    "flag": "https://media.api-sports.io/flags/cg.svg"
+  },
+  {
+    "id": 27,
+    "country": "Portugal",
+    "group": "K",
+    "fifa_code": "POR",
+    "flag": "https://media.api-sports.io/flags/pt.svg"
+  },
+  {
+    "id": 1568,
+    "country": "Uzbekistan",
+    "group": "K",
+    "fifa_code": "UZB",
+    "flag": "https://media.api-sports.io/flags/uz.svg"
+  },
+  {
+    "id": 3,
+    "country": "Croatia",
+    "group": "L",
+    "fifa_code": "CRO",
+    "flag": "https://media.api-sports.io/flags/hr.svg"
+  },
+  {
+    "id": 10,
+    "country": "England",
+    "group": "L",
+    "fifa_code": "ENG",
+    "flag": "https://media.api-sports.io/flags/gb-eng.svg"
+  },
+  {
+    "id": 1504,
+    "country": "Ghana",
+    "group": "L",
+    "fifa_code": "GHA",
+    "flag": "https://media.api-sports.io/flags/gh.svg"
+  },
+  {
+    "id": 11,
+    "country": "Panama",
+    "group": "L",
+    "fifa_code": "PAN",
+    "flag": "https://media.api-sports.io/flags/pa.svg"
+  }
+]
