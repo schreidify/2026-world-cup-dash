@@ -43,6 +43,7 @@ beforeEach(async () => {
   await env.DB.exec("DELETE FROM fixtures");
   await env.DB.exec("DELETE FROM standings");
   await env.DB.exec("DELETE FROM sync_log");
+  await env.DB.exec("UPDATE sync_lock SET locked_at = NULL WHERE id = 1");
 });
 
 describe("runHourlySync", () => {
@@ -58,14 +59,28 @@ describe("runHourlySync", () => {
   });
 
   it("logs an error status when a fetch throws, without crashing", async () => {
-    await runHourlySync(env, {
+    const result = await runHourlySync(env, {
       fetchFixturesByDate: async () => {
         throw new Error("boom");
       },
       fetchStandings: async () => standingsPayload,
     });
-    const { results } = await env.DB.prepare("SELECT status FROM sync_log").all();
-    expect(results.some((r: any) => r.status === "error")).toBe(true);
+    expect(result.status).toBe("error");
+    const row = await env.DB.prepare("SELECT status, error_message FROM sync_log").first<{
+      status: string;
+      error_message: string;
+    }>();
+    expect(row?.status).toBe("error");
+    expect(row?.error_message).toBe("boom");
+  });
+
+  it("skips when another sync is already in progress", async () => {
+    await env.DB.prepare(`UPDATE sync_lock SET locked_at = ? WHERE id = 1`).bind(new Date().toISOString()).run();
+    const result = await runHourlySync(env, {
+      fetchFixturesByDate: async () => fixturesPayload,
+      fetchStandings: async () => standingsPayload,
+    });
+    expect(result.status).toBe("skipped");
   });
 });
 

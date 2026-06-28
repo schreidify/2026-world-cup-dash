@@ -65,5 +65,13 @@ CREATE TABLE IF NOT EXISTS sync_log (
   ran_at TEXT NOT NULL,
   source TEXT NOT NULL,
   status TEXT NOT NULL,
-  requests_used INTEGER NOT NULL DEFAULT 0
+  requests_used INTEGER NOT NULL DEFAULT 0,
+  error_message TEXT
 );
+
+CREATE TABLE IF NOT EXISTS sync_lock (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  locked_at TEXT
+);
+
+INSERT OR IGNORE INTO sync_lock (id, locked_at) VALUES (1, NULL);

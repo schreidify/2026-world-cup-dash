@@ -1,0 +1,23 @@
+[package]
+name = "world-cup-dashboard"
+version = "0.1.0"
+description = "World Cup 2026 Dashboard"
+authors = ["Jen Reid Schram"]
+edition = "2021"
+
+[lib]
+name = "world_cup_dashboard_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "world-cup-dashboard"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

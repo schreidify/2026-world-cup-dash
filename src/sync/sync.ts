@@ -3,6 +3,7 @@ import { fetchFixturesByDate, fetchStandings, fetchPlayers, fetchFixtureStatisti
 import { mapFixtures, mapStandings, mapPlayers, mapMatchStats } from "./mappers";
 import { upsertFixtures, upsertStandings, upsertPlayers, upsertMatchStats, logSync } from "../db/queries";
 import { utcDatesAroundToday } from "../lib/dates";
+import { tryAcquireSyncLock, releaseSyncLock } from "./mutex";
 import type { Fixture } from "../types";
 
 export interface SyncDeps {
@@ -12,6 +13,11 @@ export interface SyncDeps {
   fetchFixtureStatistics: (key: string, fixtureId: number) => Promise<any>;
 }
 
+export type SyncResult =
+  | { status: "ok"; requestsUsed: number }
+  | { status: "error"; requestsUsed: number; error: string }
+  | { status: "skipped"; reason: string };
+
 const defaultDeps: SyncDeps = {
   fetchFixturesByDate,
   fetchStandings,
@@ -19,9 +25,20 @@ const defaultDeps: SyncDeps = {
   fetchFixtureStatistics,
 };
 
-const ROSTERS_PER_RUN = 3;
+// Keep scheduled roster backfill intentionally small so cron syncs stay under
+// low daily API quotas once fixture/standings requests are accounted for.
+const ROSTERS_PER_RUN = 1;
 
-export async function runHourlySync(env: Env, deps: Partial<SyncDeps> = {}): Promise<void> {
+function syncErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return String(err);
+}
+
+export async function runHourlySync(env: Env, deps: Partial<SyncDeps> = {}): Promise<SyncResult> {
+  if (!(await tryAcquireSyncLock(env.DB))) {
+    return { status: "skipped", reason: "sync already in progress" };
+  }
+
   const d = { ...defaultDeps, ...deps };
   let requests = 0;
   try {
@@ -70,9 +87,14 @@ export async function runHourlySync(env: Env, deps: Partial<SyncDeps> = {}): Pro
       await upsertPlayers(env.DB, mapPlayers(raw, id));
     }
 
-    await logSync(env.DB, "api-football", "ok", requests);
+    await logSync(env.DB, "api-football", "ok", requests, null);
+    return { status: "ok", requestsUsed: requests };
   } catch (err) {
-    await logSync(env.DB, "api-football", "error", requests);
+    const error = syncErrorMessage(err);
+    await logSync(env.DB, "api-football", "error", requests, error);
     console.error("hourly sync failed", err);
+    return { status: "error", requestsUsed: requests, error };
+  } finally {
+    await releaseSyncLock(env.DB);
   }
 }

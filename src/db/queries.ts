@@ -154,10 +154,16 @@ export async function getPlayersByTeam(db: D1Database, teamId: number): Promise<
   return results;
 }
 
-export async function logSync(db: D1Database, source: string, status: string, requestsUsed: number): Promise<void> {
+export async function logSync(
+  db: D1Database,
+  source: string,
+  status: string,
+  requestsUsed: number,
+  errorMessage: string | null = null,
+): Promise<void> {
   await db
-    .prepare(`INSERT INTO sync_log (ran_at, source, status, requests_used) VALUES (?,?,?,?)`)
-    .bind(new Date().toISOString(), source, status, requestsUsed)
+    .prepare(`INSERT INTO sync_log (ran_at, source, status, requests_used, error_message) VALUES (?,?,?,?,?)`)
+    .bind(new Date().toISOString(), source, status, requestsUsed, errorMessage)
     .run();
 }
 

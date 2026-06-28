@@ -24,9 +24,17 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
 
   if (path === "/api/sync" && request.method === "POST") {
     const { runHourlySync } = await import("../sync/sync");
-    await runHourlySync(env);
+    const result = await runHourlySync(env);
     const last = await getLastSync(env.DB);
-    return json({ ok: true, dataAsOf: last?.ran_at ?? null });
+    const dataAsOf = last?.ran_at ?? null;
+
+    if (result.status === "skipped") {
+      return json({ ok: false, skipped: true, reason: result.reason, dataAsOf }, 409);
+    }
+    if (result.status === "error") {
+      return json({ ok: false, error: result.error, requestsUsed: result.requestsUsed, dataAsOf }, 502);
+    }
+    return json({ ok: true, dataAsOf, requestsUsed: result.requestsUsed });
   }
 
   if (path === "/api/today" || path === "/api/tomorrow") {

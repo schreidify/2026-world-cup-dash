@@ -1,0 +1,28 @@
+{
+  "productName": "World Cup 2026",
+  "version": "0.1.0",
+  "identifier": "com.thirdgearsolutions.worldcupdash",
+  "build": {
+    "frontendDist": "../dist-shell"
+  },
+  "app": {
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "13.0",
+      "exceptionDomain": "world-cup-dashboard.jen-91b.workers.dev"
+    }
+  }
+}

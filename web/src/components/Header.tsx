@@ -7,16 +7,23 @@ interface Props {
 }
 
 export function Header({ timezone, onTimezoneChange, dataAsOf }: Props) {
+  const formattedDataAsOf = dataAsOf
+    ? new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZoneName: "short",
+      }).format(new Date(dataAsOf))
+    : null;
+
   return (
     <header className="sticky top-0 z-10 bg-navy text-white shadow-sm">
       <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
         <h1 className="font-display text-xl font-bold tracking-tight">World Cup 2026 Live</h1>
         <div className="flex items-center gap-3">
-          {dataAsOf && (
-            <span className="hidden text-xs text-slate-300 sm:inline">
-              data as of{" "}
-              {new Date(dataAsOf).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-            </span>
+          {formattedDataAsOf && (
+            <span className="hidden text-xs text-slate-300 sm:inline">data as of {formattedDataAsOf}</span>
           )}
           <select
             aria-label="Timezone"

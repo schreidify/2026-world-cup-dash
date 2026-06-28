@@ -15,11 +15,15 @@
     "sync:local": "curl -s -X POST http://localhost:8787/api/sync",
     "teams:build": "node scripts/build-teams-2026.mjs",
     "teams:seed": "node --experimental-strip-types scripts/seed-teams.mjs",
-    "teams:load:local": "wrangler d1 execute worldcup --local --file=seed-teams.sql"
+    "teams:load:local": "wrangler d1 execute worldcup --local --file=seed-teams.sql",
+    "desktop:build": "tauri build --target aarch64-apple-darwin",
+    "desktop:dev": "tauri dev",
+    "desktop:open": "open 'src-tauri/target/aarch64-apple-darwin/release/bundle/macos/World Cup 2026.app'"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.5.0",
     "@cloudflare/workers-types": "^4.20250109.0",
+    "@tauri-apps/cli": "^2.11.3",
     "typescript": "^5.5.0",
     "vitest": "^2.0.0",
     "wrangler": "^3.80.0"
