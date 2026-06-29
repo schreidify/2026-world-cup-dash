@@ -89,7 +89,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Header timezone={timezone} onTimezoneChange={handleTimezone} dataAsOf={dataAsOf} />
-      <main className="mx-auto max-w-3xl space-y-10 px-4 py-8">
+      <main className="mx-auto w-[85vw] max-w-none space-y-10 px-4 py-8">
         <section>
           <Bracket
             rounds={bracketRounds}
