@@ -32,6 +32,7 @@ export default function App() {
   const [groupStandings, setGroupStandings] = useState<ApiStanding[]>([]);
   const [teams, setTeams] = useState<ApiTeam[]>([]);
   const [dataAsOf, setDataAsOf] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const didPrimeLocalSync = useRef(false);
 
   const loadDashboard = (tz: string) => {
@@ -85,10 +86,26 @@ export default function App() {
     saveTimezone(tz);
   };
   const handleFavorite = (teamId: number) => setFavorites(toggleFavorite(teamId));
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    triggerSync()
+      .then((result) => setDataAsOf(result.dataAsOf))
+      .catch(() => null)
+      .finally(() => {
+        loadDashboard(timezone);
+        setIsRefreshing(false);
+      });
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header timezone={timezone} onTimezoneChange={handleTimezone} dataAsOf={dataAsOf} />
+      <Header
+        timezone={timezone}
+        onTimezoneChange={handleTimezone}
+        dataAsOf={dataAsOf}
+        isRefreshing={isRefreshing}
+        onRefresh={handleRefresh}
+      />
       <main className="mx-auto w-[85vw] max-w-none space-y-10 px-4 py-8">
         <section>
           <Bracket

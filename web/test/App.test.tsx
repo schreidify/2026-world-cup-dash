@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "../src/App";
 
 let fetchMock: ReturnType<typeof vi.fn>;
@@ -49,6 +49,18 @@ describe("App", () => {
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/api/sync", { method: "POST" });
+    });
+  });
+
+  it("refreshes data when the header refresh button is clicked", async () => {
+    render(<App />);
+
+    const initialSyncCalls = fetchMock.mock.calls.filter(([url]) => String(url).includes("/api/sync")).length;
+    fireEvent.click(await screen.findByRole("button", { name: "Refresh" }));
+
+    await waitFor(() => {
+      const syncCalls = fetchMock.mock.calls.filter(([url]) => String(url).includes("/api/sync")).length;
+      expect(syncCalls).toBeGreaterThan(initialSyncCalls);
     });
   });
 });
