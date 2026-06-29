@@ -82,20 +82,50 @@ interface ConnectorSegment {
 function TeamLabel({
   label,
   team,
+  possibleTeams,
   emphasized,
-  isFavorite,
+  favorites,
   onToggleFavorite,
 }: {
   label: string;
   team: ApiTeam | null;
+  possibleTeams: ApiTeam[];
   emphasized: boolean;
-  isFavorite: boolean;
+  favorites: number[];
   onToggleFavorite: (teamId: number) => void;
 }) {
+  if (team == null && possibleTeams.length > 0) {
+    const displayTeams = possibleTeams.slice(0, 2);
+
+    return (
+      <span className={`flex min-w-0 items-center gap-2 ${emphasized ? "text-navy" : "text-slate-700"}`}>
+        <span className="inline-flex shrink-0 items-center gap-1">
+          {displayTeams.map((possibleTeam, index) => (
+            <span key={possibleTeam.id} className="inline-flex items-center gap-1">
+              {possibleTeam.flag && (
+                <TeamHoverCard
+                  team={possibleTeam}
+                  isFavorite={favorites.includes(possibleTeam.id)}
+                  onToggleFavorite={onToggleFavorite}
+                >
+                  <span className="inline-flex" data-testid={`bracket-team-flag-${possibleTeam.id}`}>
+                    <img src={possibleTeam.flag} alt="" className="h-4 w-6 rounded-sm object-cover" />
+                  </span>
+                </TeamHoverCard>
+              )}
+              {index < displayTeams.length - 1 && <span className="text-slate-400">/</span>}
+            </span>
+          ))}
+        </span>
+        <span className="truncate">{label}</span>
+      </span>
+    );
+  }
+
   return (
     <span className={`flex min-w-0 items-center gap-2 ${emphasized ? "text-navy" : "text-slate-700"}`}>
       {team?.flag && (
-        <TeamHoverCard team={team} isFavorite={isFavorite} onToggleFavorite={onToggleFavorite}>
+        <TeamHoverCard team={team} isFavorite={favorites.includes(team.id)} onToggleFavorite={onToggleFavorite}>
           <span className="inline-flex" data-testid={`bracket-team-flag-${team.id}`}>
             <img src={team.flag} alt="" className="h-4 w-6 rounded-sm object-cover" />
           </span>
@@ -127,6 +157,8 @@ function MatchCard({
   const isDimmed = hasHighlights && !isHighlighted;
   const homeTeam = match.homeTeamId != null ? teams[match.homeTeamId] ?? null : null;
   const awayTeam = match.awayTeamId != null ? teams[match.awayTeamId] ?? null : null;
+  const homePossibleTeams = match.homePossibleTeamIds.map((teamId) => teams[teamId]).filter((team): team is ApiTeam => Boolean(team));
+  const awayPossibleTeams = match.awayPossibleTeamIds.map((teamId) => teams[teamId]).filter((team): team is ApiTeam => Boolean(team));
 
   return (
     <article
@@ -150,8 +182,12 @@ function MatchCard({
           <TeamLabel
             label={match.homeLabel}
             team={homeTeam}
-            emphasized={match.homeTeamId != null && favorites.includes(match.homeTeamId)}
-            isFavorite={match.homeTeamId != null && favorites.includes(match.homeTeamId)}
+            possibleTeams={homePossibleTeams}
+            emphasized={
+              (match.homeTeamId != null && favorites.includes(match.homeTeamId)) ||
+              homePossibleTeams.some((team) => favorites.includes(team.id))
+            }
+            favorites={favorites}
             onToggleFavorite={onToggleFavorite}
           />
           {match.status !== "tbd" && (
@@ -162,8 +198,12 @@ function MatchCard({
           <TeamLabel
             label={match.awayLabel}
             team={awayTeam}
-            emphasized={match.awayTeamId != null && favorites.includes(match.awayTeamId)}
-            isFavorite={match.awayTeamId != null && favorites.includes(match.awayTeamId)}
+            possibleTeams={awayPossibleTeams}
+            emphasized={
+              (match.awayTeamId != null && favorites.includes(match.awayTeamId)) ||
+              awayPossibleTeams.some((team) => favorites.includes(team.id))
+            }
+            favorites={favorites}
             onToggleFavorite={onToggleFavorite}
           />
           {match.status !== "tbd" && (

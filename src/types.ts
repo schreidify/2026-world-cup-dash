@@ -76,6 +76,8 @@ export interface BracketSlot {
   status: BracketSlotStatus;
   homeTeamId: number | null;
   awayTeamId: number | null;
+  homePossibleTeamIds: number[];
+  awayPossibleTeamIds: number[];
   homeLabel: string;
   awayLabel: string;
   homeScore: number | null;

@@ -24,6 +24,26 @@ const teams: Record<number, ApiTeam> = {
     last_appearance: 2022,
     wins_since_1930: 0,
   },
+  30: {
+    id: 30,
+    country: "Japan",
+    group: "C",
+    flag: "https://example.com/japan.png",
+    fifa_code: "JPN",
+    appearances_since_1930: 7,
+    last_appearance: 2022,
+    wins_since_1930: 0,
+  },
+  40: {
+    id: 40,
+    country: "Canada",
+    group: "D",
+    flag: "https://example.com/canada.png",
+    fifa_code: "CAN",
+    appearances_since_1930: 3,
+    last_appearance: 2022,
+    wins_since_1930: 0,
+  },
 };
 
 function makeRounds(overrides: Partial<Record<string, Partial<ApiBracketRound["matches"][number]>>> = {}): ApiBracketRound[] {
@@ -36,6 +56,8 @@ function makeRounds(overrides: Partial<Record<string, Partial<ApiBracketRound["m
     status: "tbd" as const,
     homeTeamId: null,
     awayTeamId: null,
+    homePossibleTeamIds: [],
+    awayPossibleTeamIds: [],
     homeLabel: "TBD",
     awayLabel: "TBD",
     homeScore: null,
@@ -247,5 +269,29 @@ describe("Bracket", () => {
 
     expect(screen.getByTestId("bracket-team-flag-10")).toBeInTheDocument();
     expect(screen.getByTestId("bracket-team-flag-20")).toBeInTheDocument();
+  });
+
+  it("shows possible R16 opponents as multiple flags with a slash separator", () => {
+    render(
+      <Bracket
+        rounds={makeRounds({
+          "R16-1": {
+            homeTeamId: 40,
+            homeLabel: "Canada",
+            awayTeamId: null,
+            awayPossibleTeamIds: [10, 30],
+            awayLabel: "Brazil / Japan",
+          },
+        })}
+        teams={teams}
+        timezone="UTC"
+        favorites={[]}
+        onToggleFavorite={() => {}}
+      />,
+    );
+
+    expect(screen.getByText("Brazil / Japan")).toBeInTheDocument();
+    expect(screen.getByTestId("bracket-team-flag-10")).toBeInTheDocument();
+    expect(screen.getByTestId("bracket-team-flag-30")).toBeInTheDocument();
   });
 });

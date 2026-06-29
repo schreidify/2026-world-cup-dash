@@ -33,6 +33,8 @@ export interface ApiBracketSlot {
   status: ApiBracketStatus;
   homeTeamId: number | null;
   awayTeamId: number | null;
+  homePossibleTeamIds: number[];
+  awayPossibleTeamIds: number[];
   homeLabel: string;
   awayLabel: string;
   homeScore: number | null;

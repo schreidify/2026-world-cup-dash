@@ -34,6 +34,16 @@ const teams: Team[] = [
     wins_since_1930: 2,
   },
   {
+    id: 35,
+    country: "Japan",
+    group: "B",
+    flag: null,
+    fifa_code: "JPN",
+    appearances_since_1930: 7,
+    last_appearance: 2022,
+    wins_since_1930: 0,
+  },
+  {
     id: 40,
     country: "Argentina",
     group: "B",
@@ -42,6 +52,16 @@ const teams: Team[] = [
     appearances_since_1930: 18,
     last_appearance: 2022,
     wins_since_1930: 3,
+  },
+  {
+    id: 50,
+    country: "Canada",
+    group: "C",
+    flag: null,
+    fifa_code: "CAN",
+    appearances_since_1930: 3,
+    last_appearance: 2022,
+    wins_since_1930: 0,
   },
 ];
 
@@ -137,6 +157,45 @@ describe("buildBracket", () => {
       slotId: "SF-1",
       winnerAdvancesTo: "F-1",
       loserAdvancesTo: "TP-1",
+    });
+  });
+
+  it("derives confirmed R16 teams and possible opponents from round-of-32 feeders", () => {
+    const rounds = buildBracket(
+      [
+        fixture({
+          api_fixture_id: 101,
+          stage: "Round of 32",
+          datetime_utc: "2026-06-28T18:00:00.000Z",
+          home_team_id: 50,
+          away_team_id: 20,
+          status: "finished",
+          home_score: 2,
+          away_score: 0,
+        }),
+        fixture({
+          api_fixture_id: 102,
+          stage: "Round of 32",
+          datetime_utc: "2026-06-28T20:00:00.000Z",
+          home_team_id: 10,
+          away_team_id: 35,
+          status: "scheduled",
+          home_score: null,
+          away_score: null,
+        }),
+      ],
+      teams,
+    );
+
+    expect(rounds[1].matches[0]).toMatchObject({
+      slotId: "R16-1",
+      status: "tbd",
+      homeTeamId: 50,
+      homePossibleTeamIds: [],
+      homeLabel: "Canada",
+      awayTeamId: null,
+      awayPossibleTeamIds: [10, 35],
+      awayLabel: "Brazil / Japan",
     });
   });
 });

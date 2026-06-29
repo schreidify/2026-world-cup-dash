@@ -37,11 +37,13 @@ beforeEach(() => {
 });
 
 describe("App", () => {
-  it("renders the bracket section above today's games", async () => {
+  it("renders today's and tomorrow's games above the bracket", async () => {
     render(<App />);
-    const bracketHeading = await screen.findByText("Knockout Bracket");
     const todaysHeading = await screen.findByText("Today's Games");
-    expect(bracketHeading.compareDocumentPosition(todaysHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const tomorrowsHeading = await screen.findByText("Tomorrow's Games");
+    const bracketHeading = await screen.findByText("Knockout Bracket");
+    expect(todaysHeading.compareDocumentPosition(bracketHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(tomorrowsHeading.compareDocumentPosition(bracketHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("primes a local sync before loading dashboard data on localhost", async () => {

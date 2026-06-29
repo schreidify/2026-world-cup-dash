@@ -108,19 +108,6 @@ export default function App() {
       />
       <main className="mx-auto w-[85vw] max-w-none space-y-10 px-4 py-8">
         <section>
-          <Bracket
-            rounds={bracketRounds}
-            teams={teamsById}
-            timezone={timezone}
-            favorites={favorites}
-            onToggleFavorite={handleFavorite}
-          />
-        </section>
-        <section>
-          <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Groups</h2>
-          <GroupStrip teams={teams} favorites={favorites} standings={groupStandings} onToggleFavorite={handleFavorite} />
-        </section>
-        <section>
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Today's Games</h2>
           <TodaysGames
             fixtures={fixtures}
@@ -139,6 +126,19 @@ export default function App() {
             favorites={favorites}
             onToggleFavorite={handleFavorite}
           />
+        </section>
+        <section>
+          <Bracket
+            rounds={bracketRounds}
+            teams={teamsById}
+            timezone={timezone}
+            favorites={favorites}
+            onToggleFavorite={handleFavorite}
+          />
+        </section>
+        <section>
+          <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Groups</h2>
+          <GroupStrip teams={teams} favorites={favorites} standings={groupStandings} onToggleFavorite={handleFavorite} />
         </section>
         {SHOW_MY_TEAMS && (
           <section>

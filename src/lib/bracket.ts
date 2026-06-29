@@ -144,6 +144,38 @@ function defaultSeeds(slot: BracketTemplateSlot): Pick<BracketSlot, "homeLabel" 
   };
 }
 
+function getStageSlots(stage: KnockoutStage): BracketTemplateSlot[] {
+  return BRACKET_TEMPLATE.filter((slot) => slot.stage === stage);
+}
+
+function getFixtureWinnerTeamId(fixture: Fixture | null): number | null {
+  if (!fixture || fixture.status !== "finished") return null;
+  if (fixture.home_score == null || fixture.away_score == null) return null;
+  if (fixture.home_score === fixture.away_score) return null;
+
+  return fixture.home_score > fixture.away_score ? fixture.home_team_id : fixture.away_team_id;
+}
+
+function getFixtureTeamIds(fixture: Fixture | null): number[] {
+  const ids = [fixture?.home_team_id ?? null, fixture?.away_team_id ?? null].filter((value): value is number => value != null);
+  return Array.from(new Set(ids));
+}
+
+function getRoundOf16FeederSlotIds(slot: BracketTemplateSlot): { home: string; away: string } | null {
+  if (slot.stage !== "round_of_16") return null;
+
+  const first = slot.order * 2 - 1;
+  return {
+    home: `R32-${first}`,
+    away: `R32-${first + 1}`,
+  };
+}
+
+function joinTeamNames(teamIds: number[], teamById: Map<number, Team>, fallback: string): string {
+  const labels = teamIds.map((teamId) => teamById.get(teamId)?.country).filter((value): value is string => Boolean(value));
+  return labels.length > 0 ? labels.join(" / ") : fallback;
+}
+
 export function buildBracket(fixtures: Fixture[], teams: Team[]): BracketRound[] {
   const teamById = new Map(teams.map((team) => [team.id, team]));
   const fixturesByStage = new Map<KnockoutStage, Fixture[]>();
@@ -160,13 +192,52 @@ export function buildBracket(fixtures: Fixture[], teams: Team[]): BracketRound[]
     list.sort(byStageAndTime);
   }
 
-  return ROUND_META.map((round) => {
+  const fixtureBySlotId = new Map<string, Fixture | null>();
+  for (const round of ROUND_META) {
     const stageFixtures = fixturesByStage.get(round.key) ?? [];
-    const matches = BRACKET_TEMPLATE.filter((slot) => slot.stage === round.key).map((slot, index) => {
-      const fixture = stageFixtures[index] ?? null;
-      const homeTeam = fixture?.home_team_id != null ? teamById.get(fixture.home_team_id) : null;
-      const awayTeam = fixture?.away_team_id != null ? teamById.get(fixture.away_team_id) : null;
+    const stageSlots = getStageSlots(round.key);
+    stageSlots.forEach((slot, index) => {
+      fixtureBySlotId.set(slot.slotId, stageFixtures[index] ?? null);
+    });
+  }
+
+  return ROUND_META.map((round) => {
+    const matches = getStageSlots(round.key).map((slot) => {
+      const fixture = fixtureBySlotId.get(slot.slotId) ?? null;
       const seeds = defaultSeeds(slot);
+      let homeTeamId = fixture?.home_team_id ?? null;
+      let awayTeamId = fixture?.away_team_id ?? null;
+      let homePossibleTeamIds: number[] = [];
+      let awayPossibleTeamIds: number[] = [];
+      let homeLabel = homeTeamId != null ? (teamById.get(homeTeamId)?.country ?? seeds.homeLabel) : seeds.homeLabel;
+      let awayLabel = awayTeamId != null ? (teamById.get(awayTeamId)?.country ?? seeds.awayLabel) : seeds.awayLabel;
+
+      const feeders = getRoundOf16FeederSlotIds(slot);
+      if (feeders) {
+        if (homeTeamId == null) {
+          const homeFeederFixture = fixtureBySlotId.get(feeders.home) ?? null;
+          const winnerId = getFixtureWinnerTeamId(homeFeederFixture);
+          if (winnerId != null) {
+            homeTeamId = winnerId;
+            homeLabel = teamById.get(winnerId)?.country ?? seeds.homeLabel;
+          } else {
+            homePossibleTeamIds = getFixtureTeamIds(homeFeederFixture);
+            homeLabel = joinTeamNames(homePossibleTeamIds, teamById, seeds.homeLabel);
+          }
+        }
+
+        if (awayTeamId == null) {
+          const awayFeederFixture = fixtureBySlotId.get(feeders.away) ?? null;
+          const winnerId = getFixtureWinnerTeamId(awayFeederFixture);
+          if (winnerId != null) {
+            awayTeamId = winnerId;
+            awayLabel = teamById.get(winnerId)?.country ?? seeds.awayLabel;
+          } else {
+            awayPossibleTeamIds = getFixtureTeamIds(awayFeederFixture);
+            awayLabel = joinTeamNames(awayPossibleTeamIds, teamById, seeds.awayLabel);
+          }
+        }
+      }
 
       return {
         slotId: slot.slotId,
@@ -175,10 +246,12 @@ export function buildBracket(fixtures: Fixture[], teams: Team[]): BracketRound[]
         fixtureId: fixture?.api_fixture_id ?? null,
         datetimeUtc: fixture?.datetime_utc ?? null,
         status: fixture?.status ?? "tbd",
-        homeTeamId: fixture?.home_team_id ?? null,
-        awayTeamId: fixture?.away_team_id ?? null,
-        homeLabel: homeTeam?.country ?? seeds.homeLabel,
-        awayLabel: awayTeam?.country ?? seeds.awayLabel,
+        homeTeamId,
+        awayTeamId,
+        homePossibleTeamIds,
+        awayPossibleTeamIds,
+        homeLabel,
+        awayLabel,
         homeScore: fixture?.home_score ?? null,
         awayScore: fixture?.away_score ?? null,
         winnerAdvancesTo: slot.winnerAdvancesTo,
