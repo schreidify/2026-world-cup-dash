@@ -50,6 +50,23 @@ export async function getFixturesInRange(db: D1Database, startUtc: string, endUt
   return results;
 }
 
+export async function getKnockoutFixtures(db: D1Database): Promise<Fixture[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT * FROM fixtures
+       WHERE stage LIKE 'Round of 32%'
+          OR stage LIKE 'Round of 16%'
+          OR stage LIKE 'Quarter%'
+          OR stage LIKE 'Semi%'
+          OR stage LIKE '3rd%'
+          OR stage LIKE 'Third%'
+          OR stage = 'Final'
+       ORDER BY datetime_utc ASC, api_fixture_id ASC`,
+    )
+    .all<Fixture>();
+  return results;
+}
+
 export async function upsertStandings(db: D1Database, rows: Standing[]): Promise<void> {
   if (rows.length === 0) return;
   const stmt = db.prepare(

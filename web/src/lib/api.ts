@@ -5,13 +5,48 @@ export interface ApiFixture {
   datetime_utc: string;
   venue: string | null;
   city: string | null;
-  home_team_id: number;
-  away_team_id: number;
+  home_team_id: number | null;
+  away_team_id: number | null;
   status: "scheduled" | "live" | "finished";
   elapsed_minute: number | null;
   home_score: number | null;
   away_score: number | null;
   streaming_channel: string | null;
+}
+
+export type ApiBracketStage =
+  | "round_of_32"
+  | "round_of_16"
+  | "quarter_final"
+  | "semi_final"
+  | "third_place"
+  | "final";
+
+export type ApiBracketStatus = ApiFixture["status"] | "tbd";
+
+export interface ApiBracketSlot {
+  slotId: string;
+  stage: ApiBracketStage;
+  order: number;
+  fixtureId: number | null;
+  datetimeUtc: string | null;
+  status: ApiBracketStatus;
+  homeTeamId: number | null;
+  awayTeamId: number | null;
+  homeLabel: string;
+  awayLabel: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  winnerAdvancesTo: string | null;
+  loserAdvancesTo: string | null;
+  venue: string | null;
+  city: string | null;
+}
+
+export interface ApiBracketRound {
+  key: ApiBracketStage;
+  label: string;
+  matches: ApiBracketSlot[];
 }
 
 export interface ApiStanding {
@@ -58,12 +93,21 @@ async function getJson<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+async function postJson<T>(path: string): Promise<T> {
+  const res = await fetch(path, { method: "POST" });
+  if (!res.ok) throw new Error(`${path} returned ${res.status}`);
+  return res.json() as Promise<T>;
+}
+
 export const fetchToday = (tz: string) =>
   getJson<{ fixtures: ApiFixture[]; dataAsOf: string | null }>(`/api/today?tz=${encodeURIComponent(tz)}`);
 export const fetchTomorrow = (tz: string) =>
   getJson<{ fixtures: ApiFixture[]; dataAsOf: string | null }>(`/api/tomorrow?tz=${encodeURIComponent(tz)}`);
 export const fetchStandings = () => getJson<{ standings: ApiStanding[] }>("/api/standings");
 export const fetchGroupStandings = () => getJson<{ standings: ApiStanding[] }>("/api/standings/groups");
+export const fetchBracket = () => getJson<{ rounds: ApiBracketRound[]; dataAsOf: string | null }>("/api/bracket");
 export const fetchTeams = () => getJson<{ teams: ApiTeam[] }>("/api/teams");
 export const fetchRoster = (teamId: number) => getJson<{ players: ApiPlayer[] }>(`/api/teams/${teamId}/roster`);
 export const fetchTeamDetail = (teamId: number) => getJson<TeamDetail>(`/api/teams/${teamId}/detail`);
+export const triggerSync = () =>
+  postJson<{ ok: boolean; dataAsOf: string | null; requestsUsed?: number; skipped?: boolean; reason?: string }>("/api/sync");

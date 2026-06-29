@@ -31,8 +31,8 @@ describe("api-football retries", () => {
     );
 
     const promise = fetchStandings("test-key");
-    await vi.advanceTimersByTimeAsync(1000);
-    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(15000);
+    await vi.advanceTimersByTimeAsync(16000);
     await promise;
 
     expect(calls).toBe(2);

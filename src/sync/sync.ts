@@ -1,13 +1,11 @@
 import type { Env } from "../index";
-import { fetchFixturesByDate, fetchStandings, fetchPlayers, fetchFixtureStatistics } from "./apifootball";
+import { fetchFixtures, fetchStandings, fetchPlayers, fetchFixtureStatistics } from "./apifootball";
 import { mapFixtures, mapStandings, mapPlayers, mapMatchStats } from "./mappers";
 import { upsertFixtures, upsertStandings, upsertPlayers, upsertMatchStats, logSync } from "../db/queries";
-import { utcDatesAroundToday } from "../lib/dates";
 import { tryAcquireSyncLock, releaseSyncLock } from "./mutex";
-import type { Fixture } from "../types";
 
 export interface SyncDeps {
-  fetchFixturesByDate: (key: string, date: string) => Promise<any>;
+  fetchFixtures: (key: string) => Promise<any>;
   fetchStandings: (key: string) => Promise<any>;
   fetchPlayers: (key: string, teamId: number) => Promise<any>;
   fetchFixtureStatistics: (key: string, fixtureId: number) => Promise<any>;
@@ -19,7 +17,7 @@ export type SyncResult =
   | { status: "skipped"; reason: string };
 
 const defaultDeps: SyncDeps = {
-  fetchFixturesByDate,
+  fetchFixtures,
   fetchStandings,
   fetchPlayers,
   fetchFixtureStatistics,
@@ -28,6 +26,7 @@ const defaultDeps: SyncDeps = {
 // Keep scheduled roster backfill intentionally small so cron syncs stay under
 // low daily API quotas once fixture/standings requests are accounted for.
 const ROSTERS_PER_RUN = 1;
+const MATCH_STATS_PER_RUN = 1;
 
 function syncErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
@@ -42,15 +41,8 @@ export async function runHourlySync(env: Env, deps: Partial<SyncDeps> = {}): Pro
   const d = { ...defaultDeps, ...deps };
   let requests = 0;
   try {
-    const fixturesById = new Map<number, Fixture>();
-    for (const date of utcDatesAroundToday()) {
-      const fixturesPayloadRaw = await d.fetchFixturesByDate(env.APIFOOTBALL_KEY, date);
-      requests++;
-      for (const fixture of mapFixtures(fixturesPayloadRaw)) {
-        fixturesById.set(fixture.api_fixture_id, fixture);
-      }
-    }
-    const fixtures = [...fixturesById.values()];
+    const fixtures = mapFixtures(await d.fetchFixtures(env.APIFOOTBALL_KEY));
+    requests++;
     await upsertFixtures(env.DB, fixtures);
 
     const standingsRaw = await d.fetchStandings(env.APIFOOTBALL_KEY);
@@ -59,12 +51,15 @@ export async function runHourlySync(env: Env, deps: Partial<SyncDeps> = {}): Pro
     await upsertStandings(env.DB, mapStandings(standingsRaw));
 
     const finished = fixtures.filter((f) => f.status === "finished");
+    let matchStatsFetched = 0;
     for (const f of finished) {
+      if (matchStatsFetched >= MATCH_STATS_PER_RUN) break;
       const existing = await env.DB
         .prepare(`SELECT 1 FROM match_stats WHERE fixture_id = ? LIMIT 1`)
         .bind(f.api_fixture_id)
         .first();
       if (existing) continue;
+      if (f.home_team_id == null || f.away_team_id == null) continue;
       const raw = await d.fetchFixtureStatistics(env.APIFOOTBALL_KEY, f.api_fixture_id);
       requests++;
       const goalsByTeam: Record<number, number> = {
@@ -72,6 +67,7 @@ export async function runHourlySync(env: Env, deps: Partial<SyncDeps> = {}): Pro
         [f.away_team_id]: f.away_score ?? 0,
       };
       await upsertMatchStats(env.DB, mapMatchStats(raw, f.api_fixture_id, goalsByTeam));
+      matchStatsFetched++;
     }
 
     const { results: needRoster } = await env.DB

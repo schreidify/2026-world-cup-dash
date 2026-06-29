@@ -142,6 +142,80 @@ describe("GET /api/teams", () => {
   });
 });
 
+describe("GET /api/bracket", () => {
+  it("returns ordered knockout rounds with published fixtures and TBD slots", async () => {
+    await upsertTeams(env.DB, [
+      {
+        id: 10,
+        country: "Brazil",
+        group: "A",
+        flag: "f",
+        fifa_code: "BRA",
+        appearances_since_1930: 22,
+        last_appearance: 2022,
+        wins_since_1930: 5,
+      },
+      {
+        id: 20,
+        country: "Croatia",
+        group: "B",
+        flag: "f",
+        fifa_code: "CRO",
+        appearances_since_1930: 6,
+        last_appearance: 2022,
+        wins_since_1930: 0,
+      },
+    ]);
+    await upsertFixtures(env.DB, [
+      {
+        api_fixture_id: 700,
+        stage: "Round of 16",
+        group: null,
+        datetime_utc: "2026-07-04T18:00:00.000Z",
+        venue: "MetLife",
+        city: "East Rutherford",
+        home_team_id: 10,
+        away_team_id: 20,
+        status: "scheduled",
+        elapsed_minute: null,
+        home_score: null,
+        away_score: null,
+        streaming_channel: null,
+      },
+    ]);
+    await env.DB.prepare(
+      `INSERT INTO sync_log (ran_at, source, status, requests_used) VALUES (?, 'api-football', 'ok', 1)`,
+    )
+      .bind("2026-07-03T12:00:00.000Z")
+      .run();
+
+    const res = await SELF.fetch("https://example.com/api/bracket");
+    expect(res.status).toBe(200);
+    const body = await res.json<any>();
+    expect(body.dataAsOf).toBe("2026-07-03T12:00:00.000Z");
+    expect(body.rounds.map((round: any) => round.key)).toEqual([
+      "round_of_32",
+      "round_of_16",
+      "quarter_final",
+      "semi_final",
+      "third_place",
+      "final",
+    ]);
+    expect(body.rounds[1].matches[0]).toMatchObject({
+      slotId: "R16-1",
+      fixtureId: 700,
+      homeLabel: "Brazil",
+      awayLabel: "Croatia",
+    });
+    expect(body.rounds[2].matches[0]).toMatchObject({
+      slotId: "QF-1",
+      status: "tbd",
+      homeLabel: "Winner R16 1",
+      awayLabel: "Winner R16 2",
+    });
+  });
+});
+
 describe("GET /api/teams/:id/detail", () => {
   it("returns the team's standing, next game, and roster", async () => {
     const future = new Date(Date.now() + 86400000).toISOString();

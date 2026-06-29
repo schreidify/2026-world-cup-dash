@@ -40,6 +40,7 @@ export function TeamDetailPanel({ favorites, teams, timezone, loadDetail }: Prop
 
   const activeTeam = teams.find((t) => t.id === activeId);
   const teamsById = Object.fromEntries(teams.map((t) => [t.id, t])) as Record<number, ApiTeam>;
+  const teamName = (teamId: number | null) => (teamId != null ? teamsById[teamId]?.country ?? "TBD" : "TBD");
 
   return (
     <div>
@@ -74,8 +75,7 @@ export function TeamDetailPanel({ favorites, teams, timezone, loadDetail }: Prop
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div className="mb-1 text-xs uppercase text-slate-400">Next game</div>
               <div className="font-medium text-navy">
-                {teamsById[detail.nextGame.home_team_id]?.country} vs{" "}
-                {teamsById[detail.nextGame.away_team_id]?.country}
+                {teamName(detail.nextGame.home_team_id)} vs {teamName(detail.nextGame.away_team_id)}
               </div>
               <div className="text-sm text-slate-500">{formatInZone(detail.nextGame.datetime_utc, timezone)}</div>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
@@ -84,7 +84,7 @@ export function TeamDetailPanel({ favorites, teams, timezone, loadDetail }: Prop
                   className="text-accent underline"
                   onClick={() =>
                     downloadIcs({
-                      title: `${teamsById[detail.nextGame!.home_team_id]?.country} vs ${teamsById[detail.nextGame!.away_team_id]?.country}`,
+                      title: `${teamName(detail.nextGame!.home_team_id)} vs ${teamName(detail.nextGame!.away_team_id)}`,
                       startUtc: detail.nextGame!.datetime_utc,
                       location: `${detail.nextGame!.venue ?? ""}${detail.nextGame!.city ? ", " + detail.nextGame!.city : ""}`,
                     })
@@ -95,7 +95,7 @@ export function TeamDetailPanel({ favorites, teams, timezone, loadDetail }: Prop
                 <a
                   className="text-accent underline"
                   href={buildGoogleCalendarUrl({
-                    title: `${teamsById[detail.nextGame.home_team_id]?.country} vs ${teamsById[detail.nextGame.away_team_id]?.country}`,
+                    title: `${teamName(detail.nextGame.home_team_id)} vs ${teamName(detail.nextGame.away_team_id)}`,
                     startUtc: detail.nextGame.datetime_utc,
                     location: `${detail.nextGame.venue ?? ""}${detail.nextGame.city ? ", " + detail.nextGame.city : ""}`,
                   })}

@@ -1,6 +1,7 @@
 import type { Env } from "../index";
 import {
   getFixturesInRange,
+  getKnockoutFixtures,
   getTopStandings,
   getStandingsByGroup,
   getTeams,
@@ -10,6 +11,7 @@ import {
   getNextGameForTeam,
 } from "../db/queries";
 import { addDaysYmd, localDateYmd, localDayBoundsUtc } from "../lib/dates";
+import { buildBracket } from "../lib/bracket";
 
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -55,6 +57,15 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
   if (path === "/api/standings/groups") {
     const standings = await getStandingsByGroup(env.DB);
     return json({ standings });
+  }
+
+  if (path === "/api/bracket") {
+    const [fixtures, teams, last] = await Promise.all([
+      getKnockoutFixtures(env.DB),
+      getTeams(env.DB),
+      getLastSync(env.DB),
+    ]);
+    return json({ rounds: buildBracket(fixtures, teams), dataAsOf: last?.ran_at ?? null });
   }
 
   if (path === "/api/teams") {

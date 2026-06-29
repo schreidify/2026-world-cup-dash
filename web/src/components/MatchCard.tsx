@@ -16,11 +16,15 @@ function Heart({
   favorites,
   onToggle,
 }: {
-  teamId: number;
+  teamId: number | null;
   country: string;
   favorites: number[];
   onToggle: (id: number) => void;
 }) {
+  if (teamId == null) {
+    return <span className="inline-block w-4" aria-hidden="true" />;
+  }
+
   const active = favorites.includes(teamId);
   return (
     <button
@@ -34,10 +38,11 @@ function Heart({
 }
 
 export function MatchCard({ fixture, teams, timezone, favorites, onToggleFavorite }: Props) {
-  const home = teams[fixture.home_team_id];
-  const away = teams[fixture.away_team_id];
+  const home = fixture.home_team_id != null ? teams[fixture.home_team_id] : undefined;
+  const away = fixture.away_team_id != null ? teams[fixture.away_team_id] : undefined;
   const hasFavorite =
-    favorites.includes(fixture.home_team_id) || favorites.includes(fixture.away_team_id);
+    (fixture.home_team_id != null && favorites.includes(fixture.home_team_id)) ||
+    (fixture.away_team_id != null && favorites.includes(fixture.away_team_id));
 
   return (
     <div
@@ -67,7 +72,7 @@ export function MatchCard({ fixture, teams, timezone, favorites, onToggleFavorit
             <div key={team?.id ?? idx} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Heart
-                  teamId={team?.id ?? -1}
+                  teamId={team?.id ?? null}
                   country={team?.country ?? ""}
                   favorites={favorites}
                   onToggle={onToggleFavorite}

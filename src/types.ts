@@ -1,4 +1,12 @@
 export type FixtureStatus = "scheduled" | "live" | "finished";
+export type BracketSlotStatus = FixtureStatus | "tbd";
+export type KnockoutStage =
+  | "round_of_32"
+  | "round_of_16"
+  | "quarter_final"
+  | "semi_final"
+  | "third_place"
+  | "final";
 
 export interface Team {
   id: number;
@@ -18,8 +26,8 @@ export interface Fixture {
   datetime_utc: string;
   venue: string | null;
   city: string | null;
-  home_team_id: number;
-  away_team_id: number;
+  home_team_id: number | null;
+  away_team_id: number | null;
   status: FixtureStatus;
   elapsed_minute: number | null;
   home_score: number | null;
@@ -57,4 +65,29 @@ export interface Player {
   name: string;
   position: string | null;
   shirt_number: number | null;
+}
+
+export interface BracketSlot {
+  slotId: string;
+  stage: KnockoutStage;
+  order: number;
+  fixtureId: number | null;
+  datetimeUtc: string | null;
+  status: BracketSlotStatus;
+  homeTeamId: number | null;
+  awayTeamId: number | null;
+  homeLabel: string;
+  awayLabel: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  winnerAdvancesTo: string | null;
+  loserAdvancesTo: string | null;
+  venue: string | null;
+  city: string | null;
+}
+
+export interface BracketRound {
+  key: KnockoutStage;
+  label: string;
+  matches: BracketSlot[];
 }

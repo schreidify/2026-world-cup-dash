@@ -9,8 +9,8 @@ describe("mapFixtures", () => {
     const f = result[0];
     expect(typeof f.api_fixture_id).toBe("number");
     expect(["scheduled", "live", "finished"]).toContain(f.status);
-    expect(typeof f.home_team_id).toBe("number");
-    expect(typeof f.away_team_id).toBe("number");
+    expect(f.home_team_id == null || typeof f.home_team_id === "number").toBe(true);
+    expect(f.away_team_id == null || typeof f.away_team_id === "number").toBe(true);
     expect(typeof f.datetime_utc).toBe("string");
   });
 
@@ -78,8 +78,31 @@ describe("mapFixtures", () => {
     };
     const [f] = mapFixtures(vendor as any);
     expect(f.status).toBe("finished");
+    expect(f.stage).toBe("Round of 16");
     expect(f.home_score).toBe(2);
     expect(f.away_score).toBe(1);
+  });
+
+  it("normalizes knockout round variants and allows TBD team ids", () => {
+    const vendor = {
+      response: [
+        {
+          fixture: {
+            id: 4,
+            date: "2026-07-10T18:00:00+00:00",
+            status: { short: "NS", elapsed: null },
+            venue: { name: "x", city: "y" },
+          },
+          league: { round: "Quarter-finals - 2" },
+          teams: { home: { id: null }, away: { id: null } },
+          goals: { home: null, away: null },
+        },
+      ],
+    };
+    const [f] = mapFixtures(vendor as any);
+    expect(f.stage).toBe("Quarter-finals");
+    expect(f.home_team_id).toBeNull();
+    expect(f.away_team_id).toBeNull();
   });
 });
 

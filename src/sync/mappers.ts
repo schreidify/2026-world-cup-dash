@@ -1,4 +1,5 @@
 import type { Fixture, FixtureStatus, Standing, MatchStat, Player } from "../types";
+import { normalizeKnockoutStage, knockoutStageLabel } from "../lib/bracket";
 
 function mapStatus(short: string): FixtureStatus {
   if (["FT", "AET", "PEN"].includes(short)) return "finished";
@@ -15,15 +16,17 @@ export function mapFixtures(payload: { response: any[] }): Fixture[] {
   return payload.response.map((item) => {
     const short = item.fixture.status.short as string;
     const status = mapStatus(short);
+    const round = item.league.round ?? "";
+    const knockoutStage = normalizeKnockoutStage(round);
     return {
       api_fixture_id: item.fixture.id,
-      stage: item.league.round ?? "",
-      group: parseGroup(item.league.round ?? ""),
+      stage: knockoutStage ? knockoutStageLabel(knockoutStage) : round,
+      group: parseGroup(round),
       datetime_utc: new Date(item.fixture.date).toISOString(),
       venue: item.fixture.venue?.name ?? null,
       city: item.fixture.venue?.city ?? null,
-      home_team_id: item.teams.home.id,
-      away_team_id: item.teams.away.id,
+      home_team_id: item.teams.home?.id ?? null,
+      away_team_id: item.teams.away?.id ?? null,
       status,
       elapsed_minute: status === "live" ? (item.fixture.status.elapsed ?? null) : null,
       home_score: item.goals.home ?? null,

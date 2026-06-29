@@ -5,3 +5,59 @@
 body {
   @apply bg-slate-50 font-sans text-slate-900 antialiased;
 }
+
+@keyframes bracketSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-28px, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes bracketSlideInRight {
+  from {
+    opacity: 0;
+    transform: translate3d(28px, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes bracketFadeUpCenter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.bracket-enter-left {
+  animation: bracketSlideInLeft 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bracket-enter-right {
+  animation: bracketSlideInRight 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bracket-enter-center {
+  animation: bracketFadeUpCenter 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bracket-enter-left,
+  .bracket-enter-right,
+  .bracket-enter-center {
+    animation: none;
+  }
+}

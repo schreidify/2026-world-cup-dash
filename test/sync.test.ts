@@ -49,7 +49,7 @@ beforeEach(async () => {
 describe("runHourlySync", () => {
   it("fetches, maps, and persists fixtures and standings, then logs success", async () => {
     await runHourlySync(env, {
-      fetchFixturesByDate: async () => fixturesPayload,
+      fetchFixtures: async () => fixturesPayload,
       fetchStandings: async () => standingsPayload,
     });
     const today = new Date().toISOString().slice(0, 10);
@@ -58,9 +58,36 @@ describe("runHourlySync", () => {
     expect(await getLastSync(env.DB)).not.toBeNull();
   });
 
+  it("stores knockout fixtures from the season payload without breaking day queries", async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    await runHourlySync(env, {
+      fetchFixtures: async () => ({
+        response: [
+          {
+            fixture: {
+              id: 900,
+              date: today + "T18:00:00+00:00",
+              status: { short: "NS", elapsed: null },
+              venue: { name: "v", city: "c" },
+            },
+            league: { round: "Round of 16 - 1" },
+            teams: { home: { id: 10 }, away: { id: 20 } },
+            goals: { home: null, away: null },
+          },
+        ],
+      }),
+      fetchStandings: async () => ({ response: [] }),
+      fetchPlayers: async () => ({ response: [] }),
+    });
+
+    const rows = await getTodaysFixtures(env.DB, today);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].stage).toBe("Round of 16");
+  });
+
   it("logs an error status when a fetch throws, without crashing", async () => {
     const result = await runHourlySync(env, {
-      fetchFixturesByDate: async () => {
+      fetchFixtures: async () => {
         throw new Error("boom");
       },
       fetchStandings: async () => standingsPayload,
@@ -77,7 +104,7 @@ describe("runHourlySync", () => {
   it("skips when another sync is already in progress", async () => {
     await env.DB.prepare(`UPDATE sync_lock SET locked_at = ? WHERE id = 1`).bind(new Date().toISOString()).run();
     const result = await runHourlySync(env, {
-      fetchFixturesByDate: async () => fixturesPayload,
+      fetchFixtures: async () => fixturesPayload,
       fetchStandings: async () => standingsPayload,
     });
     expect(result.status).toBe("skipped");
@@ -91,7 +118,7 @@ describe("roster backfill in sync", () => {
     await env.DB.prepare(`INSERT INTO teams (id, country) VALUES (10, 'Brazil')`).run();
 
     await runHourlySync(env, {
-      fetchFixturesByDate: async () => ({ response: [] }),
+      fetchFixtures: async () => ({ response: [] }),
       fetchStandings: async () => ({ response: [] }),
       fetchPlayers: async (_k: string, teamId: number) => ({
         response: [
@@ -150,7 +177,7 @@ describe("match-stats collection on finished matches", () => {
     let statsCalls = 0;
 
     await runHourlySync(env, {
-      fetchFixturesByDate: async () => finishedFixtures,
+      fetchFixtures: async () => finishedFixtures,
       fetchStandings: async () => ({ response: [] }),
       fetchPlayers: async () => ({ response: [] }),
       fetchFixtureStatistics: async (_k: string, fixtureId: number) => {
@@ -164,7 +191,7 @@ describe("match-stats collection on finished matches", () => {
     expect(statsCalls).toBe(1);
 
     await runHourlySync(env, {
-      fetchFixturesByDate: async () => finishedFixtures,
+      fetchFixtures: async () => finishedFixtures,
       fetchStandings: async () => ({ response: [] }),
       fetchPlayers: async () => ({ response: [] }),
       fetchFixtureStatistics: async () => {
@@ -172,6 +199,52 @@ describe("match-stats collection on finished matches", () => {
         return statsPayload;
       },
     });
+    expect(statsCalls).toBe(1);
+  });
+
+  it("caps new match-stats fetches per run to avoid bursting the API", async () => {
+    await env.DB.exec("DELETE FROM fixtures");
+    await env.DB.exec("DELETE FROM match_stats");
+
+    const today = new Date().toISOString().slice(0, 10);
+    const finishedFixtures = {
+      response: [
+        {
+          fixture: {
+            id: 500,
+            date: today + "T15:00:00+00:00",
+            status: { short: "FT", elapsed: 90 },
+            venue: { name: "v", city: "c" },
+          },
+          league: { round: "Group A - 1" },
+          teams: { home: { id: 10 }, away: { id: 20 } },
+          goals: { home: 2, away: 1 },
+        },
+        {
+          fixture: {
+            id: 501,
+            date: today + "T18:00:00+00:00",
+            status: { short: "FT", elapsed: 90 },
+            venue: { name: "v2", city: "c2" },
+          },
+          league: { round: "Group A - 2" },
+          teams: { home: { id: 30 }, away: { id: 40 } },
+          goals: { home: 1, away: 0 },
+        },
+      ],
+    };
+    let statsCalls = 0;
+
+    await runHourlySync(env, {
+      fetchFixtures: async () => finishedFixtures,
+      fetchStandings: async () => ({ response: [] }),
+      fetchPlayers: async () => ({ response: [] }),
+      fetchFixtureStatistics: async () => {
+        statsCalls++;
+        return { response: [] };
+      },
+    });
+
     expect(statsCalls).toBe(1);
   });
 });

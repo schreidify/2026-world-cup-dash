@@ -116,4 +116,17 @@ describe("MatchCard", () => {
     fireEvent.click(screen.getByLabelText("Favorite Brazil"));
     expect(spy).toHaveBeenCalledWith(10);
   });
+
+  it("renders TBD safely when a team id is missing", () => {
+    render(
+      <MatchCard
+        fixture={base({ home_team_id: null, home_score: null })}
+        teams={teams}
+        timezone="UTC"
+        favorites={[]}
+        onToggleFavorite={() => {}}
+      />,
+    );
+    expect(screen.getByText("TBD")).toBeInTheDocument();
+  });
 });
